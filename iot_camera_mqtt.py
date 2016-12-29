@@ -28,15 +28,15 @@ headers = {
     #
     # REPLACE "authorization: "Basic ..." WITH YOUR AUTHORIZATION (api_key:api_secret)
     #
-    "CK": "PKXT2XGTMRFK3T9YXT"
+    "CK": "IOT_PROJECT_KEY"
     }   
 
 # device id:281156861
 # sensor:camera01
-device = "281156861"
-sensor_camera = "camera01"
-sensor_btn = "btn"
-apikey = "PKXT2XGTMRFK3T9YXT"
+device = "IOT_DEVICE_ID"
+sensor_camera = "IOT_CAMERA_SENSOR_ID"
+sensor_btn = "IOT_BUTTON_SENSOR_ID"
+apikey = "IOT_PROJECT_KEY"
 
 client = None
 

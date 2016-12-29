@@ -26,7 +26,7 @@ headers = {
     #
     # REPLACE "authorization: "Basic ..." WITH YOUR AUTHORIZATION (api_key:api_secret)
     #
-    "CK": "PKXT2XGTMRFK3T9YXT"
+    "CK": "IOT_PROJECT_KEY"
     }   
 
 # device id:281156861
