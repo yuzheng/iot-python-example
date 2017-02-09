@@ -84,28 +84,60 @@ def show_led_thread(string, sleeptime, *args):
             newData = False
         time.sleep(1)
 
+def post_iot_rawdata(pmdata):
+    #DHT 22
+    humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT22, "18")
+    if humidity is not None and temperature is not None:
+        #print('Temp={0:0.1f}*  Humidity={1:0.1f}%'.format(temperature, humidity))
+        print('Temp={0:0.1f},Humidity={1:0.1f}'.format(temperature, humidity))
+    else:
+        print('Failed to get dht reading. Try again!')
+    headers = {"accept": "application/json","CK": iotkey}
+    try:
+        print("Send values to iot:"+device)
+        #pm1, pm10, pm25,temperature,humidity
+        data=[{"id":"pm1","save":True,"value":[pmdata[3]]},{"id":"pm10","save":True,"value":[pmdata[4]]},{"id":"pm25","save":True,"value":[pmdata[5]]},{"id":"temperature","save":True,"value":['{0:0.1f}'.format(temperature)]},{"id":"humidity","save":True,"value":['{0:0.1f}'.format(humidity)]}]
+        if pmdata[3] == 0 and pmdata[4] == 0 and pmdata[5] == 0:
+            data=[{"id":"temperature","save":True,"value":['{0:0.1f}'.format(temperature)]},{"id":"humidity","save":True,"value":['{0:0.1f}'.format(humidity)]}]
+        url="https://iot.cht.com.tw/iot/v1/device/"+device+"/rawdata"
+        response = requests.post(url, data=json.dumps(data), headers=headers)
+        #print("result:"+response.status_code)
+        print(response.status_code)
+    except:
+        print("exception: iot rawdata")
+
+
 if __name__ == "__main__":
     thread.start_new_thread(mqtt_client_thread, ("ThreadMqtt",1))
     thread.start_new_thread(show_led_thread, ("ThreadLed",3))
     
+    passv=0
     try:
         while True:
             print("read g3")
             try:
                 pmdata=air.read("/dev/ttyAMA0")
+                newData = True
+                print("Get PMS3003-G3 Values:")
+                print pmdata
             except:
                 print("exception:read g3")
                 pmdata=[0,0,0,0,0,0]
-                time.sleep(5)
-                continue
+                if passv < 5 :
+                    passv=passv+1
+                    time.sleep(3)
+                    continue
+                else:
+                    passv=0
+                #time.sleep(2)
+                #continue ##continue
 
             #params = urllib.urlencode({'field1': pmdata[3], 'field2': pmdata[4], 'field3': pmdata[5], 'key':'YOUR WRITE KEY'})
             #headers = {"Content-type": "application/x-www-form-urlencoded","Accept": "text/plain"}
             # cht iot
-            print("Get PMS3003-G3 Values:")
-            print pmdata
-            newData = True
+            post_iot_rawdata(pmdata)
             #DHT 22
+            """
             humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT22, "18")
             if humidity is not None and temperature is not None:
                 #print('Temp={0:0.1f}*  Humidity={1:0.1f}%'.format(temperature, humidity))
@@ -124,10 +156,11 @@ if __name__ == "__main__":
                 print(response.status_code)
             except:
                 print("exception: iot rawdata")
-                time.sleep(5)
-                continue
+                #time.sleep(5)
+                #continue
             #print("end")
             #seconds
+            """
             time.sleep(15)
         print("out of while")
     finally:                                                                                          
