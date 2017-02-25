@@ -3,7 +3,7 @@ import serial
 import time
 import sys
 from struct import *
-debug=1
+debug=0
 # work for pms3003
 # data structure: https://github.com/avaldebe/AQmon/blob/master/Documents/PMS3003_LOGOELE.pdf
 # fix me: the format is different between /dev/ttyUSBX(USB to Serial) and /dev/ttyAMA0(GPIO RX)
