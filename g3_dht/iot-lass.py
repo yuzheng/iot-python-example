@@ -34,20 +34,34 @@ air=g3.g3sensor()
 #GPIO.setup(ledPin, GPIO.OUT)     ## Setup GPIO Pin 7 to OUT 
 
 def post_iot_rawdata(pmdata):
+    rawdatas=[]
     #DHT 22
     humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT22, "18")
+    rawdata = None
     if humidity is not None and temperature is not None:
         print('T={0:0.1f},H={1:0.1f}'.format(temperature, humidity))
+        rawdata = [{"id":"temperature","save":True,"value":['{0:0.1f}'.format(temperature)]},{"id":"humidity","save":True,"value":['{0:0.1f}'.format(humidity)]}]
     else:
         print('Get DHT fail!')
-    headers = {"accept": "application/json","CK": iotkey}
+    if rawdata != None:
+        rawdatas = rawdatas + rawdata
+    
+    #pm1, pm10, pm25,temperature,humidity
+    #data=[{"id":"pm1","save":True,"value":[pmdata[3]]},{"id":"pm10","save":True,"value":[pmdata[4]]},{"id":"pm2_5","save":True,"value":[pmdata[5]]},{"id":"temperature","save":True,"value":['{0:0.1f}'.format(temperature)]},{"id":"humidity","save":True,"value":['{0:0.1f}'.format(humidity)]}]
+    if pmdata[3] == 0 and pmdata[4] == 0 and pmdata[5] == 0:
+        #data=[{"id":"temperature","save":True,"value":['{0:0.1f}'.format(temperature)]},{"id":"humidity","save":True,"value":['{0:0.1f}'.format(humidity)]}]
+        rawdata = None
+    else:
+        rawdata = [{"id":"pm1","save":True,"value":[pmdata[3]]},{"id":"pm10","save":True,"value":[pmdata[4]]},{"id":"pm2_5","save":True,"value":[pmdata[5]]}]
+    if rawdata != None:
+        rawdatas = rawdatas + rawdata
+    
+    #post to iot
     try:
-        #pm1, pm10, pm25,temperature,humidity
-        data=[{"id":"pm1","save":True,"value":[pmdata[3]]},{"id":"pm10","save":True,"value":[pmdata[4]]},{"id":"pm2_5","save":True,"value":[pmdata[5]]},{"id":"temperature","save":True,"value":['{0:0.1f}'.format(temperature)]},{"id":"humidity","save":True,"value":['{0:0.1f}'.format(humidity)]}]
-        if pmdata[3] == 0 and pmdata[4] == 0 and pmdata[5] == 0:
-            data=[{"id":"temperature","save":True,"value":['{0:0.1f}'.format(temperature)]},{"id":"humidity","save":True,"value":['{0:0.1f}'.format(humidity)]}]
+        headers = {"accept": "application/json","CK": iotkey}
         url="http://"+iothost+"/iot/v1/device/"+device+"/rawdata"
-        response = requests.post(url, data=json.dumps(data), headers=headers)
+        response = requests.post(url, data=json.dumps(rawdatas), headers=headers, timeout=5.0)
+        print(response.status_code)
     except:
         print("exception: iot rawdata")
 
