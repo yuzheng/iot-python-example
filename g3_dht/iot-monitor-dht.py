@@ -14,16 +14,26 @@ import requests
 import requests.packages.urllib3
 import json
 import thread
+import ConfigParser
 import g3
 import Adafruit_DHT
 import paho.mqtt.client as mqtt
 import RPi.GPIO as GPIO
 
 iotkey="DKW39G295W2UTUTXHP"
+#iotkey="DKUE7RAPEHB9EZ9FRH"
+#iotkey="DKSMKFTWGR44KGY7H5"
+#iotkey="DK0CFHS95B2ZACATPF"
 device="860607757"
-productCode="lass"
-serialId="1060100001"
+#device="897420301"
+#device="858005494"
+#device="1804450852"
+productCode="EPARP"
+serialId="100001"
 ledPin = 7
+#iothost="iot.cht.com.tw"
+iothost="iottest.epa.gov.tw"
+
 
 client = None
 
@@ -50,6 +60,11 @@ def on_message(client, userdata, msg):
     data = json.loads(msg.payload)
     iotkey = data["ck"]
     device = data["deviceId"]
+    config.set('IOT_INFO','Iot_Key', iotkey)
+    config.set('IOT_DEVICE','Device_Id', device)
+    # Writing our configuration file to 'example.cfg'
+    with open('iot.ini', 'wb') as configfile:
+        config.write(configfile)
 
 def on_disconnect(client, userdata, rc):
     print("mqtt disconnection")
@@ -66,7 +81,7 @@ def mqtt_client_thread(string, sleeptime, *args):
     client.username_pw_set(iotkey,iotkey)
     print "MQTT client connect"
     try:
-        client.connect("iot.cht.com.tw",1883, 60)
+        client.connect(iothost,1883, 60)
     except:
         print "MQTT Broker is not online. connect later."
 
@@ -96,27 +111,39 @@ def post_iot_rawdata(pmdata):
     try:
         print("Send values to iot:"+device)
         #pm1, pm10, pm25,temperature,humidity
-        data=[{"id":"pm1","save":True,"value":[pmdata[3]]},{"id":"pm10","save":True,"value":[pmdata[4]]},{"id":"pm25","save":True,"value":[pmdata[5]]},{"id":"temperature","save":True,"value":['{0:0.1f}'.format(temperature)]},{"id":"humidity","save":True,"value":['{0:0.1f}'.format(humidity)]}]
+        data=[{"id":"pm1","save":True,"value":[pmdata[3]]},{"id":"pm10","save":True,"value":[pmdata[4]]},{"id":"pm2_5","save":True,"value":[pmdata[5]]},{"id":"temperature","save":True,"value":['{0:0.1f}'.format(temperature)]},{"id":"humidity","save":True,"value":['{0:0.1f}'.format(humidity)]}]
         if pmdata[3] == 0 and pmdata[4] == 0 and pmdata[5] == 0:
             data=[{"id":"temperature","save":True,"value":['{0:0.1f}'.format(temperature)]},{"id":"humidity","save":True,"value":['{0:0.1f}'.format(humidity)]}]
-        url="https://iot.cht.com.tw/iot/v1/device/"+device+"/rawdata"
+        url="http://"+iothost+"/iot/v1/device/"+device+"/rawdata"
+        print(json.dumps(data))
         response = requests.post(url, data=json.dumps(data), headers=headers)
         #print("result:"+response.status_code)
         print(response.status_code)
     except:
         print("exception: iot rawdata")
+        #print(response.status_code)
 
 
 if __name__ == "__main__":
     thread.start_new_thread(mqtt_client_thread, ("ThreadMqtt",1))
     thread.start_new_thread(show_led_thread, ("ThreadLed",3))
     
+    config = ConfigParser.ConfigParser()
+    config.read('iot.ini')
+
+    iotkey = config.get('IOT_INFO','Iot_Key')
+    device = config.get('IOT_DEVICE','Device_Id')
+
+    print "Iot_Key = ", iotkey 
+    print "Device_Id = ", device 
+
     passv=0
     try:
         while True:
             print("read g3")
             try:
-                pmdata=air.read("/dev/ttyAMA0")
+                #pmdata=air.read("/dev/ttyAMA0")
+                pmdata=air.read("/dev/ttyS0")
                 newData = True
                 print("Get PMS3003-G3 Values:")
                 print pmdata
@@ -135,7 +162,10 @@ if __name__ == "__main__":
             #params = urllib.urlencode({'field1': pmdata[3], 'field2': pmdata[4], 'field3': pmdata[5], 'key':'YOUR WRITE KEY'})
             #headers = {"Content-type": "application/x-www-form-urlencoded","Accept": "text/plain"}
             # cht iot
-            post_iot_rawdata(pmdata)
+            if iotkey != '' and device != '':
+                post_iot_rawdata(pmdata)
+            else:
+                print "No iotkey or device"
             #DHT 22
             """
             humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT22, "18")
@@ -149,8 +179,8 @@ if __name__ == "__main__":
             try:
                 print("Send values to iot:"+device)
                 #pm1, pm10, pm25,temperature,humidity
-                data=[{"id":"pm1","save":True,"value":[pmdata[3]]},{"id":"pm10","save":True,"value":[pmdata[4]]},{"id":"pm25","save":True,"value":[pmdata[5]]},{"id":"temperature","save":True,"value":['{0:0.1f}'.format(temperature)]},{"id":"humidity","save":True,"value":['{0:0.1f}'.format(humidity)]}]
-                url="https://iot.cht.com.tw/iot/v1/device/"+device+"/rawdata"
+                data=[{"id":"pm1","save":True,"value":[pmdata[3]]},{"id":"pm10","save":True,"value":[pmdata[4]]},{"id":"pm2_5","save":True,"value":[pmdata[5]]},{"id":"temperature","save":True,"value":['{0:0.1f}'.format(temperature)]},{"id":"humidity","save":True,"value":['{0:0.1f}'.format(humidity)]}]
+                url="http://"+iothost+"/iot/v1/device/"+device+"/rawdata"
                 response = requests.post(url, data=json.dumps(data), headers=headers)
                 #print("result:"+response.status_code)
                 print(response.status_code)
