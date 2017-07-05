@@ -20,20 +20,12 @@ import Adafruit_DHT
 import paho.mqtt.client as mqtt
 import RPi.GPIO as GPIO
 
-iotkey="DKW39G295W2UTUTXHP"
-#iotkey="DKUE7RAPEHB9EZ9FRH"
-#iotkey="DKSMKFTWGR44KGY7H5"
-#iotkey="DK0CFHS95B2ZACATPF"
-device="860607757"
-#device="897420301"
-#device="858005494"
-#device="1804450852"
+iotkey="{YOUR KEY}"
+device="{YOUR DEVICE ID}"
 productCode="EPARP"
 serialId="100001"
 ledPin = 7
-#iothost="iot.cht.com.tw"
-iothost="iottest.epa.gov.tw"
-
+iothost="iot.cht.com.tw"
 
 client = None
 
