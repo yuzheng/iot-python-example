@@ -59,7 +59,7 @@ def post_iot_rawdata(pmdata):
     #post to iot
     try:
         headers = {"accept": "application/json","CK": iotkey}
-        url="http://"+iothost+"/iot/v1/device/"+device+"/rawdata"
+        url="https://"+iothost+"/iot/v1/device/"+device+"/rawdata"
         response = requests.post(url, data=json.dumps(rawdatas), headers=headers, timeout=5.0)
         print(response.status_code)
     except:
