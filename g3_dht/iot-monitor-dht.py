@@ -106,7 +106,7 @@ def post_iot_rawdata(pmdata):
         data=[{"id":"pm1","save":True,"value":[pmdata[3]]},{"id":"pm10","save":True,"value":[pmdata[4]]},{"id":"pm2_5","save":True,"value":[pmdata[5]]},{"id":"temperature","save":True,"value":['{0:0.1f}'.format(temperature)]},{"id":"humidity","save":True,"value":['{0:0.1f}'.format(humidity)]}]
         if pmdata[3] == 0 and pmdata[4] == 0 and pmdata[5] == 0:
             data=[{"id":"temperature","save":True,"value":['{0:0.1f}'.format(temperature)]},{"id":"humidity","save":True,"value":['{0:0.1f}'.format(humidity)]}]
-        url="http://"+iothost+"/iot/v1/device/"+device+"/rawdata"
+        url="https://"+iothost+"/iot/v1/device/"+device+"/rawdata"
         print(json.dumps(data))
         response = requests.post(url, data=json.dumps(data), headers=headers)
         #print("result:"+response.status_code)
@@ -172,7 +172,7 @@ if __name__ == "__main__":
                 print("Send values to iot:"+device)
                 #pm1, pm10, pm25,temperature,humidity
                 data=[{"id":"pm1","save":True,"value":[pmdata[3]]},{"id":"pm10","save":True,"value":[pmdata[4]]},{"id":"pm2_5","save":True,"value":[pmdata[5]]},{"id":"temperature","save":True,"value":['{0:0.1f}'.format(temperature)]},{"id":"humidity","save":True,"value":['{0:0.1f}'.format(humidity)]}]
-                url="http://"+iothost+"/iot/v1/device/"+device+"/rawdata"
+                url="https://"+iothost+"/iot/v1/device/"+device+"/rawdata"
                 response = requests.post(url, data=json.dumps(data), headers=headers)
                 #print("result:"+response.status_code)
                 print(response.status_code)
