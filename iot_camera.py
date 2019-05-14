@@ -41,7 +41,7 @@ def mycallback(self):
         print("Take photo...")
         camera.resolution = (640, 480)
         camera.capture("test.jpg")
-        files = {"file": open("test.jpg", "rb"), "meta":('',json.dumps({"id":"camera01","value":["Raspberry pi camera"]}), 'application/json')}
+        files = {"file": ('test', open("test.jpg", "rb"), "image/jpeg"), "meta":(None, json.dumps({"id":"camera01","value":["Raspberry pi camera"]}), 'application/json')}
         #,"meta":({"id":"camera01","value":["Raspberry pi camera"]}
         
         #
