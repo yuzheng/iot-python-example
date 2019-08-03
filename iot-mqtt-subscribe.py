@@ -8,9 +8,8 @@ MQTTHOST = "iot.cht.com.tw"
 MQTTPORT = 1883
 mqttClient = mqtt.Client()
 sensorId = "+"
-deviceId = "" #860607757
-apikey = ""  #PKXT2XGTMRFK3T9YXT
-
+deviceId = "" 
+apikey = ""
 
 # 连接MQTT服务器
 def on_mqtt_connect():
